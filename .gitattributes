@@ -1,0 +1,31 @@
+# ============================================================
+# Git 换行符与二进制处理
+#
+# 仓库内统一保存 LF（跨平台一致）；
+# 只有 Windows 批处理保留 CRLF（cmd/bat 对 LF 兼容性差）。
+# 设置后 git 不再输出 "LF will be replaced by CRLF" 警告。
+# ============================================================
+
+* text=auto eol=lf
+
+# Windows 批处理必须 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Linux 容器内使用，必须 LF（CRLF 会让 Dockerfile 的续行符失效）
+Dockerfile text eol=lf
+*.sh       text eol=lf
+
+# 二进制：不做任何换行/文本转换
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.zip   binary
+*.faiss binary
+*.pkl   binary
+*.so    binary
+*.pyd   binary
+*.dll   binary

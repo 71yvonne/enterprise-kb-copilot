@@ -1,0 +1,63 @@
+# ============================================================
+# 论文阅读助手 PaperLens — .gitignore
+# 目标：仓库里只保留源码与配置模板，运行时产物一律不入库
+# ============================================================
+
+# ========== Python 字节码 / 缓存 ==========
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# ========== 测试 / 检查工具缓存 ==========
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# ========== 打包产物 ==========
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ========== 虚拟环境（体积巨大，绝不入库） ==========
+venv/
+.venv/
+env/
+ENV/
+
+# ========== 环境变量（含真实密钥，绝不入库） ==========
+.env
+.env.*
+!.env.example
+
+# ========== IDE ==========
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ========== 运行时数据 ==========
+# 目录内容全部忽略，但保留 .gitkeep 以维持目录结构
+data/uploads/*
+!data/uploads/.gitkeep
+data/vector_store/*
+!data/vector_store/.gitkeep
+
+# ========== 日志 ==========
+logs/
+*.log
+logs.*.log
+
+# ========== Docker ==========
+.docker/
+
+# ========== 系统 ==========
+.DS_Store
+Thumbs.db
+desktop.ini

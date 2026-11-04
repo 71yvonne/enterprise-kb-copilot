@@ -1,0 +1,44 @@
+# ============================================================
+# 论文阅读助手 — Python 依赖
+# Python 版本: 3.11
+# ============================================================
+
+# ---------- Web 框架 ----------
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-multipart==0.0.12
+
+# ---------- 前端 ----------
+streamlit==1.38.0
+requests==2.32.3
+
+# ---------- 数据库 ----------
+sqlalchemy==2.0.35
+pymysql==1.1.1
+cryptography==43.0.1
+
+# ---------- LangChain 核心 ----------
+langchain==0.3.1
+langchain-core==0.3.6
+langchain-openai==0.2.1
+langchain-community==0.3.1
+
+# ---------- 向量库 ----------
+faiss-cpu==1.8.0.post1
+
+# ---------- 本地嵌入（EMBEDDING_PROVIDER=huggingface 时需要） ----------
+# 故意不锁死版本：sentence-transformers 会连带安装 torch / transformers /
+# huggingface-hub，锁死在旧版反而会和新版 hub 冲突。首次使用会下载模型到
+# %USERPROFILE%\.cache\huggingface（约 100MB，不含 torch 本体）。
+sentence-transformers>=3.1
+
+# ---------- 文档解析 ----------
+pypdf==4.3.1
+
+# ---------- 配置管理 ----------
+pydantic-settings==2.5.2
+python-dotenv==1.0.1
+
+# ---------- 工具 ----------
+loguru==0.7.2
+tiktoken==0.7.0

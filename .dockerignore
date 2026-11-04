@@ -1,0 +1,34 @@
+# ========== Python ==========
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+venv/
+.venv/
+
+# ========== Git ==========
+.git/
+.gitignore
+
+# ========== IDE ==========
+.vscode/
+.idea/
+
+# ========== Docker ==========
+.docker/
+
+# ========== 运行时 ==========
+data/uploads/*
+data/vector_store/*
+logs/
+*.log
+
+# ========== 系统 ==========
+.DS_Store
+Thumbs.db
+
+# ========== 文档 ==========
+*.md
+!README.md

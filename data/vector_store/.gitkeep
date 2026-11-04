@@ -1,0 +1,2 @@
+# 此文件保证 data/vector_store 目录被 git 跟踪
+# 运行时 FAISS 索引文件保存在此目录

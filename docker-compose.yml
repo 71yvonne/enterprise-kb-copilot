@@ -1,0 +1,131 @@
+# ============================================================
+# 论文阅读助手 — Docker Compose
+#
+# 一键启动三个服务:
+#   1. MySQL 8.0    — 数据库（论文元数据 + 文本块 + 对话记录）
+#   2. FastAPI 后端  — REST API + RAG 检索 / 跨文献对比
+#   3. Streamlit 前端 — 用户交互界面
+#
+# 启动: docker-compose up --build
+# 停止: docker-compose down
+# 清除数据: docker-compose down -v
+# ============================================================
+
+version: "3.8"
+
+services:
+  # ==================== MySQL 数据库 ====================
+  mysql:
+    image: mysql:8.0
+    container_name: kb-copilot-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-kb_copilot_2026}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-kb_copilot}
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      # 数据持久化
+      - mysql_data:/var/lib/mysql
+      # 首次启动时自动执行建表脚本
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD:-kb_copilot_2026}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - kb-network
+
+  # ==================== FastAPI 后端 ====================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kb-copilot-backend
+    restart: unless-stopped
+    command: >
+      uvicorn backend.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --log-level info
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      # 开发模式: 挂载代码目录实现热重载
+      - ./backend:/app/backend
+      # 数据目录持久化
+      - upload_data:/app/data/uploads
+      - vector_data:/app/data/vector_store
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      # 覆盖 .env 中的 MySQL 主机名为 Docker 服务名
+      - MYSQL_HOST=mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - kb-network
+
+  # ==================== Streamlit 前端 ====================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kb-copilot-frontend
+    restart: unless-stopped
+    command: >
+      streamlit run frontend/app.py
+      --server.port=8501
+      --server.address=0.0.0.0
+      --server.headless=true
+      --browser.gatherUsageStats=false
+      --theme.primaryColor="#667eea"
+      --theme.backgroundColor="#ffffff"
+      --theme.secondaryBackgroundColor="#f8f9ff"
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      # 前端通过 Docker 内部网络访问后端
+      - BACKEND_URL=http://backend:8000
+    volumes:
+      # 开发模式: 挂载前端代码实现热重载
+      - ./frontend:/app/frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - kb-network
+
+# ==================== 持久化卷 ====================
+volumes:
+  mysql_data:
+    driver: local
+  upload_data:
+    driver: local
+  vector_data:
+    driver: local
+
+# ==================== 网络 ====================
+networks:
+  kb-network:
+    driver: bridge
